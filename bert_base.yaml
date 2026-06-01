@@ -1,0 +1,25 @@
+# Training configuration for the primary BERT NER run.
+# Override any field on the CLI, e.g.:  python src/train.py --epochs 5
+
+model_name: bert-base-uncased      # or distilbert-base-uncased for the lighter run
+corpus: data/processed/corpus.jsonl
+output_dir: models/bert-skills-ner
+
+# data splits
+val_frac: 0.1
+test_frac: 0.1
+seed: 42
+
+# optimization
+epochs: 4
+train_batch_size: 16
+eval_batch_size: 32
+learning_rate: 0.00002          # 2e-5, standard for BERT fine-tuning
+weight_decay: 0.01
+warmup_ratio: 0.1
+
+# logging / checkpointing
+eval_strategy: epoch
+save_strategy: epoch
+load_best_model_at_end: true
+metric_for_best_model: f1
