@@ -51,12 +51,12 @@ fi
 # ---- 1. download -------------------------------------------------------- #
 echo ""
 echo "[1/4] downloading datasets ..."
-python src/download_data.py
+python -m src.download_data
 
 # ---- 2. preprocess ------------------------------------------------------ #
 echo ""
 echo "[2/4] preprocessing (weak-labeling BIO tags) ..."
-python src/preprocess.py --model "$MODEL_NAME" --max "$PREPROCESS_MAX"
+python -m src.preprocess --model "$MODEL_NAME" --max "$PREPROCESS_MAX"
 
 # ---- 3. train ----------------------------------------------------------- #
 echo ""
@@ -69,12 +69,12 @@ else
   echo "  Press Ctrl-C within 8 seconds to abort ..."
   sleep 8
 fi
-python src/train.py --model "$MODEL_NAME" --output-dir "$MODEL_DIR"
+python -m src.train --model "$MODEL_NAME" --output-dir "$MODEL_DIR"
 
 # ---- 4. export gold template -------------------------------------------- #
 echo ""
 echo "[4/4] exporting gold annotation template ..."
-python src/evaluate.py --export-gold --n "$GOLD_N" --model-name "$MODEL_NAME"
+python -m src.evaluate --export-gold --n "$GOLD_N" --model-name "$MODEL_NAME"
 
 echo ""
 echo "=================================================================="

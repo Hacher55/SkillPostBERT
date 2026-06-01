@@ -48,17 +48,17 @@ sleep 5
 # ---- 1. fold corrections back in ---------------------------------------- #
 echo ""
 echo "[1/3] applying corrected labels ..."
-python src/evaluate.py --apply-conll "$GOLD_CONLL"
+python -m src.evaluate --apply-conll "$GOLD_CONLL"
 
 # ---- 2. head-to-head evaluation ----------------------------------------- #
 echo ""
 echo "[2/3] evaluating BERT vs keyword baseline on gold ..."
-python src/evaluate.py --gold "$GOLD_JSONL" --model "$MODEL_DIR"
+python -m src.evaluate --gold "$GOLD_JSONL" --model "$MODEL_DIR"
 
 # ---- 3. cross-discipline comparison ------------------------------------- #
 echo ""
 echo "[3/3] cross-discipline skill analysis (BERT predictions) ..."
-python src/compare.py --source bert --model "$MODEL_DIR"
+python -m src.compare --source bert --model "$MODEL_DIR"
 
 echo ""
 echo "=================================================================="

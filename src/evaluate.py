@@ -172,7 +172,7 @@ def predict_baseline(records: list[dict]) -> list[list[str]]:
     preds = []
     for rec in records:
         text = rec.get("text") or _detokenize(rec["tokens"])
-        enc = tok(text, truncation=True, max_length=len(rec["tokens"]),
+        enc = tok(text, truncation=True, max_length=512,
                   return_offsets_mapping=True)
         toks = tok.convert_ids_to_tokens(enc["input_ids"])
         bio = matcher.bio_tags(toks, enc["offset_mapping"], text)
