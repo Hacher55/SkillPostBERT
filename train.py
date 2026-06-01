@@ -24,8 +24,9 @@ from pathlib import Path
 import numpy as np
 import yaml
 
-from .model import ROOT, build_collator, build_model, load_dataset
+from .model import build_collator, build_model, load_dataset
 from .taxonomy import ID2LABEL
+from .utils import ROOT
 
 
 def load_config(path: Path) -> dict:

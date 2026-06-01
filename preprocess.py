@@ -36,8 +36,8 @@ from transformers import AutoTokenizer
 
 from .baseline import KeywordMatcher
 from .taxonomy import LABEL2ID
+from .utils import ROOT
 
-ROOT = Path(__file__).resolve().parents[1]
 RAW_DIR = ROOT / "data" / "raw"
 OUT_DIR = ROOT / "data" / "processed"
 DEFAULT_MODEL = "bert-base-uncased"
