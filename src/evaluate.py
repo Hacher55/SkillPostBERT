@@ -187,16 +187,19 @@ def predict_bert(records: list[dict], model_dir: Path) -> list[list[str]]:
     import torch
     from transformers import (AutoModelForTokenClassification,
                               AutoTokenizer)
+    from .utils import get_device
 
+    device = get_device()
     tok = AutoTokenizer.from_pretrained(str(model_dir))
     model = AutoModelForTokenClassification.from_pretrained(str(model_dir))
+    model.to(device)
     model.eval()
 
     preds = []
     with torch.no_grad():
         for rec in records:
             ids = tok.convert_tokens_to_ids(rec["tokens"])
-            input_ids = torch.tensor([ids])
+            input_ids = torch.tensor([ids]).to(device)
             attn = torch.ones_like(input_ids)
             logits = model(input_ids=input_ids, attention_mask=attn).logits
             pred_ids = logits.argmax(-1)[0].tolist()

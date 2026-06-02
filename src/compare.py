@@ -151,14 +151,17 @@ def add_bert_tags(records: list[dict], model_dir: Path) -> None:
     import torch
     from transformers import AutoModelForTokenClassification, AutoTokenizer
     from .taxonomy import ID2LABEL
+    from .utils import get_device
 
+    device = get_device()
     tok = AutoTokenizer.from_pretrained(str(model_dir))
     model = AutoModelForTokenClassification.from_pretrained(str(model_dir))
+    model.to(device)
     model.eval()
     with torch.no_grad():
         for rec in records:
             ids = tok.convert_tokens_to_ids(rec["tokens"])
-            input_ids = torch.tensor([ids])
+            input_ids = torch.tensor([ids]).to(device)
             logits = model(input_ids=input_ids,
                            attention_mask=torch.ones_like(input_ids)).logits
             rec["bert_tags"] = [ID2LABEL[p] for p in logits.argmax(-1)[0].tolist()]

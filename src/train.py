@@ -26,7 +26,7 @@ import yaml
 
 from .model import build_collator, build_model, load_dataset
 from .taxonomy import ID2LABEL
-from .utils import ROOT
+from .utils import ROOT, get_hardware_profile
 
 
 def load_config(path: Path) -> dict:
@@ -110,6 +110,10 @@ def main() -> None:
     cfg = resolve(load_config(Path(args.config)), args)
     print("Config:\n" + json.dumps(cfg, indent=2))
 
+    hw = get_hardware_profile()
+    print(f"\nHardware detected: {hw['device_name']}")
+    print(f"  fp16={hw['fp16']}  bf16={hw['bf16']}")
+
     corpus = ROOT / cfg["corpus"] if not Path(cfg["corpus"]).is_absolute() \
         else Path(cfg["corpus"])
     ds, tokenizer = load_dataset(
@@ -128,10 +132,17 @@ def main() -> None:
     out_dir = ROOT / cfg["output_dir"] if not Path(cfg["output_dir"]).is_absolute() \
         else Path(cfg["output_dir"])
 
+    # Cap batch size on CPU to avoid running out of RAM.
+    train_bs = cfg["train_batch_size"]
+    if hw["batch_size_cap"] and train_bs > hw["batch_size_cap"]:
+        print(f"  CPU detected — capping train batch size "
+              f"{train_bs} -> {hw['batch_size_cap']}")
+        train_bs = hw["batch_size_cap"]
+
     training_args = TrainingArguments(
         output_dir=str(out_dir),
         num_train_epochs=cfg["epochs"],
-        per_device_train_batch_size=cfg["train_batch_size"],
+        per_device_train_batch_size=train_bs,
         per_device_eval_batch_size=cfg["eval_batch_size"],
         learning_rate=float(cfg["learning_rate"]),
         weight_decay=cfg["weight_decay"],
@@ -140,6 +151,8 @@ def main() -> None:
         save_strategy=cfg["save_strategy"],
         load_best_model_at_end=cfg["load_best_model_at_end"],
         metric_for_best_model=cfg["metric_for_best_model"],
+        fp16=hw["fp16"],
+        bf16=hw["bf16"],
         logging_steps=50,
         report_to="none",
     )

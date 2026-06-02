@@ -61,11 +61,23 @@ python -m src.preprocess --model "$MODEL_NAME" --max "$PREPROCESS_MAX"
 # ---- 3. train ----------------------------------------------------------- #
 echo ""
 echo "[3/4] training ..."
-if python -c "import torch,sys; sys.exit(0 if torch.cuda.is_available() else 1)" 2>/dev/null; then
-  echo "  GPU detected — training will be fast."
+GPU_TYPE=$(python -c "
+import torch
+if torch.backends.mps.is_available():
+    print('mps')
+elif torch.cuda.is_available():
+    print('cuda')
+else:
+    print('none')
+" 2>/dev/null || echo "none")
+
+if [[ "$GPU_TYPE" == "mps" ]]; then
+  echo "  Apple Silicon GPU (MPS) detected — training will use Metal."
+elif [[ "$GPU_TYPE" == "cuda" ]]; then
+  echo "  CUDA GPU detected — training will be fast."
 else
-  echo "  WARNING: no CUDA GPU detected. Fine-tuning $MODEL_NAME on CPU is slow"
-  echo "  (potentially hours). Consider a Colab GPU, or MODEL_NAME=distilbert-base-uncased."
+  echo "  WARNING: no GPU detected. Fine-tuning $MODEL_NAME on CPU is slow"
+  echo "  (potentially hours). Consider MODEL_NAME=distilbert-base-uncased."
   echo "  Press Ctrl-C within 8 seconds to abort ..."
   sleep 8
 fi
