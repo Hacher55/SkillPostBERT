@@ -135,19 +135,23 @@ flowchart TD
     style E fill:#fffbcc,stroke:#aaa
 ```
 
-> **Windows note:** The run scripts are Bash (`.sh`). Use **Git Bash** or **WSL**
-> to execute them directly, or run each step individually with the `python -m`
-> commands shown in the [step-by-step section](#step-by-step) below.
+### Quick run
 
-### Quick run (Mac / Linux / Git Bash)
-
+**Mac / Linux / Git Bash**
 ```bash
 ./run_part1.sh
 # ... hand-correct data/processed/gold.conll in any text editor ...
 ./run_part2.sh
 ```
 
-Override the model or output directory inline:
+**Windows (PowerShell)** — no Git Bash or WSL required
+```powershell
+.\run_part1.ps1
+# ... hand-correct data\processed\gold.conll in any text editor ...
+.\run_part2.ps1
+```
+
+Override the model or output directory:
 
 **Mac / Linux / Git Bash**
 ```bash
@@ -158,7 +162,7 @@ MODEL_NAME=distilbert-base-uncased MODEL_DIR=models/distilbert-skills-ner ./run_
 ```powershell
 $env:MODEL_NAME = "distilbert-base-uncased"
 $env:MODEL_DIR  = "models/distilbert-skills-ner"
-bash run_part1.sh      # requires Git Bash or WSL on PATH
+.\run_part1.ps1
 ```
 
 ---
@@ -272,8 +276,10 @@ data/
   processed/       corpus.jsonl, gold files (generated)
 results/           metrics JSON + figures (generated)
 models/            fine-tuned checkpoints (generated, gitignored)
-run_part1.sh       part 1 pipeline script (Bash)
-run_part2.sh       part 2 pipeline script (Bash)
+run_part1.sh       part 1 pipeline script (Mac / Linux / Git Bash)
+run_part2.sh       part 2 pipeline script (Mac / Linux / Git Bash)
+run_part1.ps1      part 1 pipeline script (Windows PowerShell)
+run_part2.ps1      part 2 pipeline script (Windows PowerShell)
 ```
 
 ---
