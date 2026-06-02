@@ -19,10 +19,17 @@ NLP Applications course project (ECE/SSE/CYS 691).
 
 ## Pipeline
 
-```
-raw postings ─► preprocess ─► [ BERT NER  ]  ─► skills ─► classify ─► compare
-                          └─► [ keyword   ]  ─► skills ─┘            └─► charts
-                                baseline
+```mermaid
+flowchart LR
+    A([Raw Postings]) --> B[Preprocess]
+    B --> C[BERT NER]
+    B --> D[Keyword Baseline]
+    C --> E[Skills]
+    D --> F[Skills]
+    E --> G[Classify]
+    F --> G
+    G --> H[Compare]
+    H --> I([Charts & Results])
 ```
 
 ## Models
@@ -78,20 +85,33 @@ pip install -r requirements.txt
 
 ### 3 — Place your Kaggle credentials
 
+You can either copy `kaggle.json` from [kaggle.com/settings](https://www.kaggle.com/settings) → *API → Create New Token*, or generate the file interactively with the commands below.
+
 **Mac / Linux**
-```
-~/.kaggle/kaggle.json
-```
-Then lock down the permissions:
 ```bash
+read -p "Kaggle username: " KAGGLE_USER
+read -s -p "Kaggle API key:  " KAGGLE_KEY && echo
+mkdir -p ~/.kaggle
+echo "{\"username\":\"$KAGGLE_USER\",\"key\":\"$KAGGLE_KEY\"}" > ~/.kaggle/kaggle.json
 chmod 600 ~/.kaggle/kaggle.json
 ```
 
-**Windows**
+**Windows (PowerShell)**
+```powershell
+$user = Read-Host "Kaggle username"
+$key  = Read-Host "Kaggle API key"
+New-Item -ItemType Directory -Force "$env:USERPROFILE\.kaggle" | Out-Null
+"{`"username`":`"$user`",`"key`":`"$key`"}" |
+    Set-Content "$env:USERPROFILE\.kaggle\kaggle.json" -Encoding utf8
 ```
-C:\Users\<YourUsername>\.kaggle\kaggle.json
+
+**Windows (Command Prompt)**
+```cmd
+set /p KAGGLE_USER=Kaggle username: 
+set /p KAGGLE_KEY=Kaggle API key: 
+mkdir "%USERPROFILE%\.kaggle" 2>nul
+echo {"username":"%KAGGLE_USER%","key":"%KAGGLE_KEY%"} > "%USERPROFILE%\.kaggle\kaggle.json"
 ```
-No permission change needed on Windows.
 
 ---
 
@@ -100,6 +120,20 @@ No permission change needed on Windows.
 The pipeline has a manual annotation checkpoint in the middle — you hand-correct
 a small gold set so the BERT-vs-baseline comparison is honest rather than
 circular. It is split into two scripts.
+
+```mermaid
+flowchart TD
+    A([Download Data]) --> B[Preprocess]
+    B --> C[Train BERT NER]
+    C --> D[Export Gold Set]
+    D --> E{Manual Annotation\ngold.conll}
+    E --> F[Apply Corrections]
+    F --> G[Evaluate BERT vs Baseline]
+    G --> H[Cross-discipline Analysis]
+    H --> I([Results & Charts])
+
+    style E fill:#fffbcc,stroke:#aaa
+```
 
 > **Windows note:** The run scripts are Bash (`.sh`). Use **Git Bash** or **WSL**
 > to execute them directly, or run each step individually with the `python -m`
