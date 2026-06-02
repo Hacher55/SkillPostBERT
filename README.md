@@ -83,6 +83,39 @@ python -m venv .venv
 pip install -r requirements.txt
 ```
 
+### 2b — GPU / CUDA setup (NVIDIA only)
+
+`requirements.txt` pins `torch>=2.0` which resolves to a **CPU-only** build on
+most platforms. If you have an NVIDIA GPU, replace it with a CUDA-enabled wheel
+**after** the step above.
+
+| GPU generation | Architecture | Recommended wheel |
+|---|---|---|
+| RTX 50xx (5070, 5080, 5090, …) | Blackwell | `cu128` |
+| RTX 40xx (4070, 4080, 4090, …) | Ada Lovelace | `cu128` |
+| RTX 30xx (3070, 3080, 3090, …) | Ampere | `cu121` or `cu128` |
+| RTX 20xx / GTX 16xx | Turing / Turing | `cu118` |
+
+**Blackwell / Ada (RTX 40xx / 50xx) — CUDA 12.8**
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128
+```
+
+**Ampere (RTX 30xx) — CUDA 12.1**
+```bash
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+```
+
+Verify the install found your GPU:
+```bash
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+# expected: True  NVIDIA GeForce RTX 5070  (or your card)
+```
+
+> **Note:** Your NVIDIA driver must support the CUDA version you choose.
+> Run `nvidia-smi` and check the *CUDA Version* in the top-right corner.
+> Drivers shipped with RTX 50xx cards support CUDA 12.8+.
+
 ### 3 — Place your Kaggle credentials
 
 You can either copy `kaggle.json` from [kaggle.com/settings](https://www.kaggle.com/settings) → *API → Create New Token*, or generate the file interactively with the commands below.

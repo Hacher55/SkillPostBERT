@@ -1,3 +1,5 @@
+# CPU-only torch is installed by default. For NVIDIA GPU support see the
+# "GPU / CUDA setup" section in README.md before running pip install.
 torch>=2.0
 transformers>=4.40
 datasets>=2.18

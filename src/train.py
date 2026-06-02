@@ -142,6 +142,10 @@ def main() -> None:
     total_steps = steps_per_epoch * cfg["epochs"]
     warmup_steps = int(cfg["warmup_ratio"] * total_steps)
 
+    import inspect
+    _ta_params = inspect.signature(TrainingArguments.__init__).parameters
+    _eval_key = "eval_strategy" if "eval_strategy" in _ta_params else "evaluation_strategy"
+
     training_args = TrainingArguments(
         output_dir=str(out_dir),
         num_train_epochs=cfg["epochs"],
@@ -150,7 +154,7 @@ def main() -> None:
         learning_rate=float(cfg["learning_rate"]),
         weight_decay=cfg["weight_decay"],
         warmup_steps=warmup_steps,
-        eval_strategy=cfg["eval_strategy"],
+        **{_eval_key: cfg["eval_strategy"]},
         save_strategy=cfg["save_strategy"],
         load_best_model_at_end=cfg["load_best_model_at_end"],
         metric_for_best_model=cfg["metric_for_best_model"],
@@ -161,13 +165,16 @@ def main() -> None:
         report_to="none",
     )
 
+    _trainer_params = inspect.signature(Trainer.__init__).parameters
+    _tok_key = "processing_class" if "processing_class" in _trainer_params else "tokenizer"
+
     trainer = Trainer(
         model=model,
         args=training_args,
         train_dataset=ds["train"],
         eval_dataset=ds["validation"],
         data_collator=collator,
-        processing_class=tokenizer,
+        **{_tok_key: tokenizer},
         compute_metrics=make_compute_metrics(),
     )
 
