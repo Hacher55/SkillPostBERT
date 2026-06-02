@@ -42,9 +42,10 @@ Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
 |---|---|
 | `./scripts/setup_env.sh` | Automate steps 1–4: create env, install deps, detect GPU |
 | `./scripts/check_env.sh` | Verify environment is ready before running |
+| `./scripts/clear_env.sh` | Remove the conda environment entirely (rebuild with `setup_env`) |
 | `./scripts/clear_cache.sh` | Delete raw data (re-fetched on next run) |
 | `./scripts/clear_training.sh` | Delete model checkpoints (retrain without re-downloading) |
-| `./scripts/reset.sh` | Full reset — wipe all downloaded and generated artefacts |
+| `./scripts/reset.sh` | Full reset — wipe all artifacts and remove the conda environment |
 
 ### Windows (PowerShell)
 
@@ -65,9 +66,10 @@ Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
 |---|---|
 | `.\scripts\setup_env.ps1` | Automate steps 1–4: create env, install deps, detect GPU |
 | `.\scripts\check_env.ps1` | Verify environment is ready before running |
+| `.\scripts\clear_env.ps1` | Remove the conda environment entirely (rebuild with `setup_env`) |
 | `.\scripts\clear_cache.ps1` | Delete raw data (re-fetched on next run) |
 | `.\scripts\clear_training.ps1` | Delete model checkpoints (retrain without re-downloading) |
-| `.\scripts\reset.ps1` | Full reset — wipe all downloaded and generated artefacts |
+| `.\scripts\reset.ps1` | Full reset — wipe all downloaded and generated artifacts |
 
 ---
 
@@ -371,16 +373,19 @@ Writes CSV tables and figures to `results/`.
 |---|---|
 | `setup_env` | One-shot env setup: create conda env, install deps, detect and install CUDA PyTorch |
 | `check_env` | Report Python version, package versions, GPU, Kaggle credentials, and directory state |
+| `clear_env` | Remove the conda environment entirely — run `setup_env` afterwards to rebuild |
 | `clear_cache` | `data/raw/` — datasets are re-fetched on the next run |
 | `clear_training` | `models/` — checkpoints are regenerated on the next train |
 | `reset` | Everything above plus `data/processed/` and `results/` |
 
-> `reset` prints a summary and waits 8 seconds before deleting so you can Ctrl-C.
+> `clear_env` and `reset` print a summary and wait 8 seconds before acting so you can Ctrl-C.
+> `clear_env` will refuse to run if the target environment is currently active — deactivate first.
 
 **Mac / Linux / Git Bash**
 ```bash
 ./scripts/setup_env.sh        # run from base env, before activating
 ./scripts/check_env.sh        # run after activating
+./scripts/clear_env.sh        # run after deactivating (conda deactivate)
 ./scripts/clear_cache.sh
 ./scripts/clear_training.sh
 ./scripts/reset.sh
@@ -390,6 +395,7 @@ Writes CSV tables and figures to `results/`.
 ```powershell
 .\scripts\setup_env.ps1       # run from base env, before activating
 .\scripts\check_env.ps1       # run after activating
+.\scripts\clear_env.ps1       # run after deactivating (conda deactivate)
 .\scripts\clear_cache.ps1
 .\scripts\clear_training.ps1
 .\scripts\reset.ps1
@@ -415,6 +421,7 @@ configs/
 scripts/
   setup_env.sh/.ps1       one-shot env setup: conda env, deps, CUDA PyTorch
   check_env.sh/.ps1       diagnostic: Python, packages, GPU, Kaggle, directories
+  clear_env.sh/.ps1       remove the conda environment entirely
   run_part1.sh/.ps1       pipeline part 1: download → preprocess → train → export gold
   run_part2.sh/.ps1       pipeline part 2: apply corrections → evaluate → compare
   clear_cache.sh/.ps1     delete downloaded raw data
