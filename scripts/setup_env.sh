@@ -17,7 +17,7 @@
 #
 # Usage:
 #   ./scripts/setup_env.sh
-set -uo pipefail
+set -euo pipefail
 
 cd "$(dirname "$0")/.."
 

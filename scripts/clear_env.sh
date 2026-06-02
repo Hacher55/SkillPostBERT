@@ -10,7 +10,7 @@
 #
 # Usage:
 #   ./scripts/clear_env.sh
-set -uo pipefail
+set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
@@ -47,6 +47,10 @@ sleep 8
 
 echo ""
 echo "Removing environment '$ENV_NAME' ..."
-conda env remove -n "$ENV_NAME" -y
+if ! conda env remove -n "$ENV_NAME" -y; then
+  echo "ERROR: failed to remove environment '$ENV_NAME'."
+  echo "  Try manually: conda env remove -n $ENV_NAME"
+  exit 1
+fi
 
 echo "Done. Run ./scripts/setup_env.sh to rebuild."

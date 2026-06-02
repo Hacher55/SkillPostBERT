@@ -37,7 +37,7 @@ Write-Host " Press Ctrl-C within 8 seconds to abort ..."
 Write-Host "=================================================================="
 Start-Sleep -Seconds 8
 
-# ---- data and artefact directories ---------------------------------------- #
+# ---- data and artifact directories ---------------------------------------- #
 $targets = @(
     @{ Path = "data\raw";        Label = "raw data" },
     @{ Path = "data\processed";  Label = "processed data" },

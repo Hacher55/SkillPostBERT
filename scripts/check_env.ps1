@@ -29,57 +29,53 @@ $issues = 0
 Write-Host ""
 Write-Host "[python]"
 
-$pyScript = @'
-import sys, importlib
-
-# Python version
-vi = sys.version_info
-ok = (vi.major, vi.minor) >= (3, 10)
-mark = "[ok]  " if ok else "[FAIL]"
-suffix = "" if ok else "  (need >= 3.10)"
-print(f"  {mark} Python {vi.major}.{vi.minor}.{vi.micro}{suffix}")
-issues = 0 if ok else 1
-
-# Required packages
-PACKAGES = [
-    ("torch",        "torch"),
-    ("transformers", "transformers"),
-    ("accelerate",   "accelerate"),
-    ("datasets",     "datasets"),
-    ("evaluate",     "evaluate"),
-    ("seqeval",      "seqeval"),
-    ("pandas",       "pandas"),
-    ("sklearn",      "scikit-learn"),
-    ("matplotlib",   "matplotlib"),
-    ("kaggle",       "kaggle"),
-    ("yaml",         "pyyaml"),
-]
-for mod, pkg in PACKAGES:
-    try:
-        m = importlib.import_module(mod)
-        ver = getattr(m, "__version__", "?")
-        print(f"  [ok]   {pkg}: {ver}")
-    except ImportError:
-        print(f"  [FAIL] {pkg}  <-- pip install -r requirements.txt")
-        issues += 1
-
-# GPU / hardware
-try:
-    from src.utils import get_hardware_profile
-    p = get_hardware_profile()
-    dt, dn = p["device_type"], p["device_name"]
-    if dt == "cpu":
-        print(f"  [warn] GPU: {dn}  (training will be slow — see README GPU setup)")
-    elif dt == "cuda":
-        import torch
-        print(f"  [ok]   GPU: {dn}  (CUDA {torch.version.cuda})")
-    else:
-        print(f"  [ok]   GPU: {dn}")
-except Exception as e:
-    print(f"  [warn] GPU check failed: {e}")
-
-sys.exit(issues)
-'@
+# Build the Python check script as a string array to avoid here-string issues.
+# Python f-strings use single quotes so they don't conflict with PS1 strings.
+$pyLines = @(
+    "import sys, importlib",
+    "vi = sys.version_info",
+    "ok = (vi.major, vi.minor) >= (3, 10)",
+    "mark = '[ok]  ' if ok else '[FAIL]'",
+    "suffix = '' if ok else '  (need >= 3.10)'",
+    "print(f'  {mark} Python {vi.major}.{vi.minor}.{vi.micro}{suffix}')",
+    "issues = 0 if ok else 1",
+    "PACKAGES = [",
+    "    ('torch',        'torch'),",
+    "    ('transformers', 'transformers'),",
+    "    ('accelerate',   'accelerate'),",
+    "    ('datasets',     'datasets'),",
+    "    ('evaluate',     'evaluate'),",
+    "    ('seqeval',      'seqeval'),",
+    "    ('pandas',       'pandas'),",
+    "    ('sklearn',      'scikit-learn'),",
+    "    ('matplotlib',   'matplotlib'),",
+    "    ('kaggle',       'kaggle'),",
+    "    ('yaml',         'pyyaml'),",
+    "]",
+    "for mod, pkg in PACKAGES:",
+    "    try:",
+    "        m = importlib.import_module(mod)",
+    "        ver = getattr(m, '__version__', '?')",
+    "        print(f'  [ok]   {pkg}: {ver}')",
+    "    except ImportError:",
+    "        print(f'  [FAIL] {pkg}  <-- pip install -r requirements.txt')",
+    "        issues += 1",
+    "try:",
+    "    from src.utils import get_hardware_profile",
+    "    p = get_hardware_profile()",
+    "    dt, dn = p['device_type'], p['device_name']",
+    "    if dt == 'cpu':",
+    "        print(f'  [warn] GPU: {dn}  (training will be slow - see README GPU setup)')",
+    "    elif dt == 'cuda':",
+    "        import torch",
+    "        print(f'  [ok]   GPU: {dn}  (CUDA {torch.version.cuda})')",
+    "    else:",
+    "        print(f'  [ok]   GPU: {dn}')",
+    "except Exception as e:",
+    "    print(f'  [warn] GPU check failed: {e}')",
+    "sys.exit(issues)"
+)
+$pyScript = $pyLines -join "`n"
 
 python -c $pyScript
 $pyExitCode = $LASTEXITCODE
@@ -92,7 +88,7 @@ Write-Host "[kaggle]"
 $kaggleFile = Join-Path $HOME ".kaggle\kaggle.json"
 if (-not (Test-Path $kaggleFile)) {
     Write-Host "  [FAIL] kaggle.json not found at ~\.kaggle\kaggle.json"
-    Write-Host "         See README Setup section or run .\scripts\setup_kaggle.ps1"
+    Write-Host "         See README Setup section for instructions."
     $issues++
 } else {
     try {
@@ -100,7 +96,7 @@ if (-not (Test-Path $kaggleFile)) {
         if ($creds.username -and $creds.key) {
             Write-Host "  [ok]   kaggle.json present (user: $($creds.username))"
         } else {
-            Write-Host "  [FAIL] kaggle.json exists but is missing 'username' or 'key' fields"
+            Write-Host "  [FAIL] kaggle.json is missing 'username' or 'key' fields"
             $issues++
         }
     } catch {
@@ -116,51 +112,52 @@ Write-Host "[directories]"
 # data/raw
 $rawDir = "data\raw"
 if (-not (Test-Path $rawDir)) {
-    Write-Host "  [warn] data\raw\ does not exist — will be created on first download"
+    Write-Host "  [warn] data\raw\ not found - will be created on first download"
 } else {
-    $csvFiles = @(Get-ChildItem $rawDir -Filter "*.csv" -Recurse -ErrorAction SilentlyContinue)
-    if ($csvFiles.Count -eq 0) {
-        Write-Host "  [warn] data\raw\ is empty — run .\scripts\run_part1.ps1 to download"
+    $csvCount = @(Get-ChildItem $rawDir -Filter "*.csv" -Recurse -ErrorAction SilentlyContinue).Count
+    if ($csvCount -eq 0) {
+        Write-Host "  [warn] data\raw\ is empty - run .\scripts\run_part1.ps1 to download"
     } else {
-        Write-Host "  [ok]   data\raw\ — $($csvFiles.Count) CSV file(s) present"
+        Write-Host "  [ok]   data\raw\ - $csvCount CSV file(s)"
     }
 }
 
 # data/processed
-$corpusFile = "data\processed\corpus.jsonl"
-$goldConll  = "data\processed\gold.conll"
-$goldJsonl  = "data\processed\gold.jsonl"
 if (-not (Test-Path "data\processed")) {
-    Write-Host "  [warn] data\processed\ does not exist — generated by run_part1.ps1"
+    Write-Host "  [warn] data\processed\ not found - generated by run_part1.ps1"
 } else {
-    $corpusMark = if (Test-Path $corpusFile) { "[ok]  " } else { "[warn]" }
-    $corpusNote = if (Test-Path $corpusFile) { "" }       else { "  (not yet generated)" }
-    Write-Host "  $corpusMark corpus.jsonl$corpusNote"
-
-    $goldMark = if (Test-Path $goldConll) { "[ok]  " } else { "[warn]" }
-    $goldNote = if (Test-Path $goldConll) { "" }       else { "  (not yet generated)" }
-    Write-Host "  $goldMark gold.conll$goldNote"
+    if (Test-Path "data\processed\corpus.jsonl") {
+        Write-Host "  [ok]   corpus.jsonl"
+    } else {
+        Write-Host "  [warn] corpus.jsonl not yet generated"
+    }
+    if (Test-Path "data\processed\gold.conll") {
+        Write-Host "  [ok]   gold.conll"
+    } else {
+        Write-Host "  [warn] gold.conll not yet generated"
+    }
 }
 
 # models
 $modelDir = "models"
 if (-not (Test-Path $modelDir)) {
-    Write-Host "  [warn] models\ does not exist — generated by run_part1.ps1 (train step)"
+    Write-Host "  [warn] models\ not found - generated by run_part1.ps1 (train step)"
 } else {
     $modelDirs = @(Get-ChildItem $modelDir -Directory -ErrorAction SilentlyContinue)
     if ($modelDirs.Count -eq 0) {
-        Write-Host "  [warn] models\ is empty — run .\scripts\run_part1.ps1 to train"
+        Write-Host "  [warn] models\ is empty - run .\scripts\run_part1.ps1 to train"
     } else {
-        Write-Host "  [ok]   models\ — $($modelDirs.Count) model(s): $($modelDirs.Name -join ', ')"
+        $modelList = $modelDirs.Name -join ", "
+        Write-Host "  [ok]   models\ - $($modelDirs.Count) model(s): $modelList"
     }
 }
 
-# results
+# results (informational only)
 $resultsDir = "results"
 if (Test-Path $resultsDir) {
-    $resultFiles = @(Get-ChildItem $resultsDir -File -ErrorAction SilentlyContinue)
-    if ($resultFiles.Count -gt 0) {
-        Write-Host "  [ok]   results\ — $($resultFiles.Count) file(s) present"
+    $resultCount = @(Get-ChildItem $resultsDir -File -ErrorAction SilentlyContinue).Count
+    if ($resultCount -gt 0) {
+        Write-Host "  [ok]   results\ - $resultCount file(s)"
     }
 }
 

@@ -38,7 +38,7 @@ echo " Press Ctrl-C within 8 seconds to abort ..."
 echo "=================================================================="
 sleep 8
 
-# ---- data and artefact directories ---------------------------------------- #
+# ---- data and artifact directories ---------------------------------------- #
 clear_dir() {
     local path="$1"
     local label="$2"

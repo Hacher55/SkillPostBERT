@@ -158,7 +158,7 @@ else
   if [[ "$model_count" -eq 0 ]]; then
     echo "  [warn] models/ is empty — run ./scripts/run_part1.sh to train"
   else
-    model_names=$(find models -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | paste -sd ', ')
+    model_names=$(find models -mindepth 1 -maxdepth 1 -type d -exec basename {} \; | paste -sd ',' | sed 's/,/, /g')
     echo "  [ok]   models/ — ${model_count} model(s): ${model_names}"
   fi
 fi
