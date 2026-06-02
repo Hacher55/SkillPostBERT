@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# setup_env.ps1 — one-shot environment setup.
+# setup_env.ps1  - one-shot environment setup.
 #
 #   1. Create (or verify) the SSE691NLP conda environment (Python 3.10)
 #   2. Install all Python dependencies from requirements.txt
@@ -11,8 +11,8 @@
 #   .\scripts\run_part1.ps1
 #
 # Knobs (set env vars before running):
-#   $env:CONDA_ENV  — conda environment name  (default: SSE691NLP)
-#   $env:PYTHON_VER — Python version to create (default: 3.10)
+#   $env:CONDA_ENV   - conda environment name  (default: SSE691NLP)
+#   $env:PYTHON_VER  - Python version to create (default: 3.10)
 #
 # Usage:
 #   .\scripts\setup_env.ps1
@@ -49,7 +49,7 @@ $envList = (conda env list) -join "`n"
 $envExists = $envList -match "(?m)^\s*$([regex]::Escape($ENV_NAME))[\s/\\]"
 
 if ($envExists) {
-    Write-Host "  '$ENV_NAME' already exists — skipping creation."
+    Write-Host "  '$ENV_NAME' already exists  - skipping creation."
 } else {
     Write-Host "  creating '$ENV_NAME' (Python $PYTHON_VER) ..."
     conda create -n $ENV_NAME python=$PYTHON_VER -y
@@ -73,13 +73,13 @@ $nvidiaSMI = $null
 try { $nvidiaSMI = (nvidia-smi) -join " " } catch {}
 
 if (-not $nvidiaSMI) {
-    Write-Host "  No NVIDIA GPU detected — CPU PyTorch is sufficient."
+    Write-Host "  No NVIDIA GPU detected  - CPU PyTorch is sufficient."
     Write-Host "  (Apple Silicon MPS is already included in the default wheel.)"
 } else {
     $cudaMatch = [regex]::Match($nvidiaSMI, "CUDA Version:\s*(\d+)\.(\d+)")
     if (-not $cudaMatch.Success) {
         Write-Host "  NVIDIA GPU found but could not parse CUDA driver version."
-        Write-Host "  Keeping CPU PyTorch — swap manually if needed (see README)."
+        Write-Host "  Keeping CPU PyTorch  - swap manually if needed (see README)."
     } else {
         $major   = [int]$cudaMatch.Groups[1].Value
         $minor   = [int]$cudaMatch.Groups[2].Value
@@ -96,7 +96,7 @@ if (-not $nvidiaSMI) {
             $wheel = "cu118"
         } else {
             $wheel = $null
-            Write-Host "  CUDA $major.$minor is older than 11.8 — no matching wheel available."
+            Write-Host "  CUDA $major.$minor is older than 11.8  - no matching wheel available."
             Write-Host "  Keeping CPU PyTorch."
         }
 

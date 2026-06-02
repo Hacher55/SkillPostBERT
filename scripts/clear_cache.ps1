@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# clear_cache.ps1 — removes downloaded raw data so it will be re-fetched on the
+# clear_cache.ps1  - removes downloaded raw data so it will be re-fetched on the
 # next run. Does NOT touch processed data, trained models, or results.
 #
 # Usage:
@@ -10,7 +10,7 @@ Set-Location (Split-Path $PSScriptRoot -Parent)
 $RAW = "data\raw"
 
 if (-not (Test-Path $RAW)) {
-    Write-Host "data\raw\ does not exist — nothing to clear."
+    Write-Host "data\raw\ does not exist  - nothing to clear."
     exit 0
 }
 

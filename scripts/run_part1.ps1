@@ -1,10 +1,10 @@
 #Requires -Version 5.1
-# run_part1.ps1 — everything up to the manual annotation checkpoint.
+# run_part1.ps1  - everything up to the manual annotation checkpoint.
 #
 #   download data -> preprocess -> train BERT -> export a gold template
 #
 # After this finishes you HAND-CORRECT data\processed\gold.conll, then run
-# scripts\run_part2.ps1. The correction step can't be automated — it's what makes the
+# scripts\run_part2.ps1. The correction step can't be automated  - it's what makes the
 # BERT-vs-baseline comparison meaningful rather than circular.
 #
 # Usage:

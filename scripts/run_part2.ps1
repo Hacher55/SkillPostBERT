@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# run_part2.ps1 — after you've hand-corrected data\processed\gold.conll.
+# run_part2.ps1  - after you've hand-corrected data\processed\gold.conll.
 #
 #   apply corrections -> evaluate BERT vs baseline on gold -> cross-discipline
 #   comparison (the figures/tables for your paper)

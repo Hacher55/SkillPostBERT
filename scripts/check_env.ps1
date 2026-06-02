@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# check_env.ps1 — verify the environment is ready to run the pipeline.
+# check_env.ps1  - verify the environment is ready to run the pipeline.
 #
 # Checks:
 #   - Python version (>= 3.10)

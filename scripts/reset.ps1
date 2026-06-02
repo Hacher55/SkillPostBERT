@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# reset.ps1 — full clean slate. Removes all generated and downloaded artifacts
+# reset.ps1  - full clean slate. Removes all generated and downloaded artifacts
 # and the conda environment:
 #
 #   data/raw/        downloaded Kaggle datasets
@@ -14,7 +14,7 @@
 #   .\scripts\run_part1.ps1
 #
 # Knobs:
-#   $env:CONDA_ENV — conda environment name to remove (default: SSE691NLP)
+#   $env:CONDA_ENV  - conda environment name to remove (default: SSE691NLP)
 #
 # Usage:
 #   .\scripts\reset.ps1
@@ -47,12 +47,12 @@ $targets = @(
 
 foreach ($t in $targets) {
     if (-not (Test-Path $t.Path)) {
-        Write-Host "  $($t.Path)\ — not found, skipping."
+        Write-Host "  $($t.Path)\  - not found, skipping."
         continue
     }
     $items = Get-ChildItem $t.Path -Force
     if ($items.Count -eq 0) {
-        Write-Host "  $($t.Path)\ — already empty."
+        Write-Host "  $($t.Path)\  - already empty."
         continue
     }
     Write-Host "  Clearing $($t.Path) ($($t.Label)) ..."
@@ -68,13 +68,13 @@ $condaVer = $null
 try { $condaVer = conda --version } catch {}
 
 if (-not $condaVer) {
-    Write-Host "  conda not found — skipping environment removal."
+    Write-Host "  conda not found  - skipping environment removal."
 } else {
     $envList = (conda env list) -join "`n"
     if (-not ($envList -match "(?m)^\s*$([regex]::Escape($ENV_NAME))[\s/\\]")) {
-        Write-Host "  conda env '$ENV_NAME' — not found, skipping."
+        Write-Host "  conda env '$ENV_NAME'  - not found, skipping."
     } elseif ($env:CONDA_DEFAULT_ENV -eq $ENV_NAME) {
-        Write-Host "  conda env '$ENV_NAME' — currently active, skipping."
+        Write-Host "  conda env '$ENV_NAME'  - currently active, skipping."
         Write-Host "    Run 'conda deactivate' then .\scripts\clear_env.ps1 to remove it."
     } else {
         Write-Host "  Removing conda environment '$ENV_NAME' ..."
@@ -82,7 +82,7 @@ if (-not $condaVer) {
         if ($LASTEXITCODE -eq 0) {
             Write-Host "    done."
         } else {
-            Write-Host "    failed (exit $LASTEXITCODE) — remove manually with: conda env remove -n $ENV_NAME"
+            Write-Host "    failed (exit $LASTEXITCODE)  - remove manually with: conda env remove -n $ENV_NAME"
         }
     }
 }

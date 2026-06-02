@@ -1,11 +1,11 @@
 #Requires -Version 5.1
-# clear_env.ps1 — removes the SSE691NLP conda environment entirely.
+# clear_env.ps1  - removes the SSE691NLP conda environment entirely.
 #
 # Use this to do a clean reinstall (e.g. to change Python version or fix a
 # broken environment). After clearing, rerun setup_env to rebuild it.
 #
 # Knobs:
-#   $env:CONDA_ENV — environment name to remove (default: SSE691NLP)
+#   $env:CONDA_ENV  - environment name to remove (default: SSE691NLP)
 #
 # Usage:
 #   .\scripts\clear_env.ps1
@@ -25,7 +25,7 @@ if (-not $condaVer) {
 # ---- check the environment exists ----------------------------------------- #
 $envList = (conda env list) -join "`n"
 if (-not ($envList -match "(?m)^\s*$([regex]::Escape($ENV_NAME))[\s/\\]")) {
-    Write-Host "Conda environment '$ENV_NAME' does not exist — nothing to remove."
+    Write-Host "Conda environment '$ENV_NAME' does not exist  - nothing to remove."
     exit 0
 }
 

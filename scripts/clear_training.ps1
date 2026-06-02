@@ -1,5 +1,5 @@
 #Requires -Version 5.1
-# clear_training.ps1 — removes fine-tuned model checkpoints so training can be
+# clear_training.ps1  - removes fine-tuned model checkpoints so training can be
 # rerun. Does NOT touch raw data, processed data, or results.
 #
 # Usage:
@@ -10,7 +10,7 @@ Set-Location (Split-Path $PSScriptRoot -Parent)
 $MODELS = "models"
 
 if (-not (Test-Path $MODELS)) {
-    Write-Host "models\ does not exist — nothing to clear."
+    Write-Host "models\ does not exist  - nothing to clear."
     exit 0
 }
 
