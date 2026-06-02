@@ -17,6 +17,50 @@ NLP Applications course project (ECE/SSE/CYS 691).
 4. **Baseline:** a rule-based keyword matcher, to demonstrate the value added
    by the learned model. Both are scored on Precision / Recall / F1 per category.
 
+## Quick reference
+
+Steps 1–5 are one-time setup. Steps 6–8 are the pipeline. Utilities at the bottom are run as needed.
+
+> **Tip:** Steps 1–4 (create env, install deps, CUDA PyTorch) can be automated with `setup_env` — see the [Automated setup](#automated-setup) section.
+
+### Mac / Linux / Git Bash
+
+| Step | Command | Description |
+|---|---|---|
+| 1 | `conda create -n SSE691NLP python=3.10` | Create project environment |
+| 2 | `conda activate SSE691NLP` | Activate environment |
+| 3 | `pip install -r requirements.txt` | Install all dependencies |
+| 4 *(GPU)* | `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128` | Swap in CUDA-enabled PyTorch (NVIDIA only) |
+| 5 | copy `~/.kaggle/kaggle.json` | Place Kaggle API credentials (see Setup) |
+| 6 | `./scripts/run_part1.sh` | Download data → preprocess → train BERT → export gold set |
+| 7 | edit `data/processed/gold.conll` | **Manual:** hand-correct BIO tags in the gold annotation file |
+| 8 | `./scripts/run_part2.sh` | Apply corrections → evaluate BERT vs baseline → generate charts |
+| — | `./scripts/setup_env.sh` | Automate steps 1–4: create env, install deps, detect GPU |
+| — | `./scripts/check_env.sh` | Verify environment is ready before running the pipeline |
+| — | `./scripts/clear_cache.sh` | Delete downloaded raw data so it will be re-fetched |
+| — | `./scripts/clear_training.sh` | Delete model checkpoints so training can be rerun |
+| — | `./scripts/reset.sh` | Full reset — wipe all downloaded and generated artefacts |
+
+### Windows (PowerShell)
+
+| Step | Command | Description |
+|---|---|---|
+| 1 | `conda create -n SSE691NLP python=3.10` | Create project environment |
+| 2 | `conda activate SSE691NLP` | Activate environment |
+| 3 | `pip install -r requirements.txt` | Install all dependencies |
+| 4 *(GPU)* | `pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu128` | Swap in CUDA-enabled PyTorch (NVIDIA only) |
+| 5 | copy `~\.kaggle\kaggle.json` | Place Kaggle API credentials (see Setup) |
+| 6 | `.\scripts\run_part1.ps1` | Download data → preprocess → train BERT → export gold set |
+| 7 | edit `data\processed\gold.conll` | **Manual:** hand-correct BIO tags in the gold annotation file |
+| 8 | `.\scripts\run_part2.ps1` | Apply corrections → evaluate BERT vs baseline → generate charts |
+| — | `.\scripts\setup_env.ps1` | Automate steps 1–4: create env, install deps, detect GPU |
+| — | `.\scripts\check_env.ps1` | Verify environment is ready before running the pipeline |
+| — | `.\scripts\clear_cache.ps1` | Delete downloaded raw data so it will be re-fetched |
+| — | `.\scripts\clear_training.ps1` | Delete model checkpoints so training can be rerun |
+| — | `.\scripts\reset.ps1` | Full reset — wipe all downloaded and generated artefacts |
+
+---
+
 ## Pipeline
 
 ```mermaid
@@ -56,6 +100,41 @@ Place raw CSVs under `data/raw/`. They are gitignored — see `data/raw/README.m
 
 - Python 3.10+
 - A [Kaggle account](https://www.kaggle.com) with an API token (`kaggle.json`)
+
+### Automated setup
+
+`setup_env` automates steps 1–4 (conda env creation, pip install, and CUDA PyTorch detection) in a single command. Run it once from your base conda environment — no activation required first.
+
+**Mac / Linux / Git Bash**
+```bash
+./scripts/setup_env.sh
+conda activate SSE691NLP   # activate after setup completes
+```
+
+**Windows (PowerShell)**
+```powershell
+.\scripts\setup_env.ps1
+conda activate SSE691NLP   # activate after setup completes
+```
+
+The script detects your hardware automatically:
+- **NVIDIA GPU** — reads the CUDA driver version from `nvidia-smi` and installs the correct `cu118` / `cu121` / `cu128` wheel.
+- **Apple Silicon** — the default PyTorch wheel already includes MPS; no extra install is needed.
+- **CPU only** — the default wheel is kept.
+
+After activation, run `check_env` to confirm everything is in order before starting the pipeline:
+
+**Mac / Linux / Git Bash**
+```bash
+./scripts/check_env.sh
+```
+
+**Windows (PowerShell)**
+```powershell
+.\scripts\check_env.ps1
+```
+
+---
 
 ### 1 — Create and activate a conda environment
 
@@ -307,15 +386,50 @@ src/
 configs/
   bert_base.yaml   default training hyperparameters
 scripts/
-  run_part1.sh     part 1 pipeline script (Mac / Linux / Git Bash)
-  run_part2.sh     part 2 pipeline script (Mac / Linux / Git Bash)
-  run_part1.ps1    part 1 pipeline script (Windows PowerShell)
-  run_part2.ps1    part 2 pipeline script (Windows PowerShell)
+  setup_env.sh/.ps1        one-shot env setup: create conda env, install deps, CUDA torch
+  check_env.sh/.ps1        diagnostic: Python, packages, GPU, Kaggle creds, directories
+  run_part1.sh/.ps1        part 1 pipeline: download → preprocess → train → export gold
+  run_part2.sh/.ps1        part 2 pipeline: apply corrections → evaluate → compare
+  clear_cache.sh/.ps1      delete downloaded raw data (re-download on next run)
+  clear_training.sh/.ps1   delete fine-tuned model checkpoints
+  reset.sh/.ps1            full clean slate — removes all generated artefacts
 data/
   raw/             gitignored — place Kaggle CSVs here
   processed/       corpus.jsonl, gold files (generated)
 results/           metrics JSON + figures (generated)
 models/            fine-tuned checkpoints (generated, gitignored)
+```
+
+---
+
+## Utility scripts
+
+| Script | What it does |
+|---|---|
+| `setup_env` | Create conda env, install deps, auto-detect GPU and install CUDA PyTorch |
+| `check_env` | Report Python version, package versions, GPU, Kaggle credentials, and directory state |
+| `clear_cache` | Remove `data/raw/` — re-download Kaggle datasets on next run |
+| `clear_training` | Remove `models/` — retrain without re-downloading |
+| `reset` | Remove everything above plus `data/processed/` and `results/` — full clean slate |
+
+`reset` prints a summary and waits 8 seconds before deleting anything so you can Ctrl-C.
+
+**Mac / Linux / Git Bash**
+```bash
+./scripts/setup_env.sh        # first-time setup (run from base conda env)
+./scripts/check_env.sh        # verify environment (run after activating)
+./scripts/clear_cache.sh
+./scripts/clear_training.sh
+./scripts/reset.sh
+```
+
+**Windows (PowerShell)**
+```powershell
+.\scripts\setup_env.ps1       # first-time setup (run from base conda env)
+.\scripts\check_env.ps1       # verify environment (run after activating)
+.\scripts\clear_cache.ps1
+.\scripts\clear_training.ps1
+.\scripts\reset.ps1
 ```
 
 ---
