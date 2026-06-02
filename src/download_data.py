@@ -56,8 +56,17 @@ def _check_kaggle_available() -> None:
         )
 
 
+def _marker(slug: str) -> Path:
+    safe = slug.replace("/", "_")
+    return RAW_DIR / f".{safe}.done"
+
+
 def download(slug: str, label: str) -> None:
     print(f"\n=== {label} ===")
+    marker = _marker(slug)
+    if marker.exists():
+        print(f"    already cached — skipping download.")
+        return
     print(f"    {slug} -> {RAW_DIR}")
     RAW_DIR.mkdir(parents=True, exist_ok=True)
     cmd = [
@@ -68,6 +77,7 @@ def download(slug: str, label: str) -> None:
     ]
     try:
         subprocess.run(cmd, check=True)
+        marker.touch()
         print(f"    done.")
     except subprocess.CalledProcessError as exc:
         print(f"    FAILED ({exc.returncode}). "
