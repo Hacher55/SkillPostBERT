@@ -47,12 +47,12 @@ def _check_kaggle_available() -> None:
             "  pip install kaggle\n"
             "Then create an API token (see this file's docstring)."
         )
-    except OSError as exc:
-        # kaggle raises OSError on import if credentials are missing
+    except (OSError, ValueError) as exc:
         sys.exit(
-            f"Kaggle credentials not found ({exc}).\n"
-            "Create kaggle.json and place it in ~/.kaggle/ "
-            "(see this file's docstring)."
+            f"Kaggle credentials invalid or missing ({exc}).\n"
+            "Create kaggle.json and place it in C:\\Users\\<you>\\.kaggle\\\n"
+            "  or set KAGGLE_USERNAME / KAGGLE_KEY env vars.\n"
+            "(see this file's docstring for full setup steps)"
         )
 
 
