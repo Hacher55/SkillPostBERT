@@ -56,8 +56,8 @@ def get_hardware_profile() -> dict:
         return {
             "device_type": "cuda",
             "device_name": f"CUDA GPU — {name}",
-            "fp16": True,
             "bf16": major >= 8,   # bf16 requires Ampere (sm_80) or newer
+            "fp16": major < 8,    # fp16 fallback for pre-Ampere; mutually exclusive with bf16
             "batch_size_cap": None,
             "num_workers": 4,
         }
