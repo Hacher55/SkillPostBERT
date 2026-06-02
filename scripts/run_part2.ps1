@@ -5,11 +5,11 @@
 #   comparison (the figures/tables for your paper)
 #
 # Usage:
-#   .\run_part2.ps1
+#   .\scripts\run_part2.ps1
 #
-# Must use the SAME MODEL_DIR you trained with in run_part1.ps1.
+# Must use the SAME MODEL_DIR you trained with in scripts\run_part1.ps1.
 
-Set-Location $PSScriptRoot
+Set-Location (Split-Path $PSScriptRoot -Parent)
 
 # ---- configuration (must match run_part1.ps1) ---------------------------- #
 $MODEL_DIR  = if ($env:MODEL_DIR)   { $env:MODEL_DIR }   else { "models/bert-skills-ner" }
@@ -29,11 +29,11 @@ if ($LASTEXITCODE -ne 0) {
     exit 1
 }
 if (-not (Test-Path $GOLD_CONLL)) {
-    Write-Host "ERROR: $GOLD_CONLL not found. Run run_part1.ps1 first."
+    Write-Host "ERROR: $GOLD_CONLL not found. Run .\scripts\run_part1.ps1 first."
     exit 1
 }
 if (-not (Test-Path $MODEL_DIR -PathType Container)) {
-    Write-Host "ERROR: trained model not found at $MODEL_DIR. Run run_part1.ps1 first."
+    Write-Host "ERROR: trained model not found at $MODEL_DIR. Run .\scripts\run_part1.ps1 first."
     exit 1
 }
 

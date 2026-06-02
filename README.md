@@ -57,7 +57,15 @@ Place raw CSVs under `data/raw/`. They are gitignored — see `data/raw/README.m
 - Python 3.10+
 - A [Kaggle account](https://www.kaggle.com) with an API token (`kaggle.json`)
 
-### 1 — Create and activate a virtual environment
+### 1 — Create and activate a conda environment
+
+**Recommended (all platforms)**
+```bash
+conda create -n SSE691NLP python=3.10
+conda activate SSE691NLP
+```
+
+If you prefer a plain virtualenv instead:
 
 **Mac / Linux**
 ```bash
@@ -69,12 +77,6 @@ source .venv/bin/activate
 ```powershell
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-```
-
-**Windows (Command Prompt)**
-```cmd
-python -m venv .venv
-.venv\Scripts\activate.bat
 ```
 
 ### 2 — Install dependencies
@@ -172,30 +174,30 @@ flowchart TD
 
 **Mac / Linux / Git Bash**
 ```bash
-./run_part1.sh
+./scripts/run_part1.sh
 # ... hand-correct data/processed/gold.conll in any text editor ...
-./run_part2.sh
+./scripts/run_part2.sh
 ```
 
 **Windows (PowerShell)** — no Git Bash or WSL required
 ```powershell
-.\run_part1.ps1
+.\scripts\run_part1.ps1
 # ... hand-correct data\processed\gold.conll in any text editor ...
-.\run_part2.ps1
+.\scripts\run_part2.ps1
 ```
 
 Override the model or output directory:
 
 **Mac / Linux / Git Bash**
 ```bash
-MODEL_NAME=distilbert-base-uncased MODEL_DIR=models/distilbert-skills-ner ./run_part1.sh
+MODEL_NAME=distilbert-base-uncased MODEL_DIR=models/distilbert-skills-ner ./scripts/run_part1.sh
 ```
 
 **Windows (PowerShell)**
 ```powershell
 $env:MODEL_NAME = "distilbert-base-uncased"
 $env:MODEL_DIR  = "models/distilbert-skills-ner"
-.\run_part1.ps1
+.\scripts\run_part1.ps1
 ```
 
 ---
@@ -304,15 +306,16 @@ src/
   utils.py         shared helpers + hardware detection
 configs/
   bert_base.yaml   default training hyperparameters
+scripts/
+  run_part1.sh     part 1 pipeline script (Mac / Linux / Git Bash)
+  run_part2.sh     part 2 pipeline script (Mac / Linux / Git Bash)
+  run_part1.ps1    part 1 pipeline script (Windows PowerShell)
+  run_part2.ps1    part 2 pipeline script (Windows PowerShell)
 data/
   raw/             gitignored — place Kaggle CSVs here
   processed/       corpus.jsonl, gold files (generated)
 results/           metrics JSON + figures (generated)
 models/            fine-tuned checkpoints (generated, gitignored)
-run_part1.sh       part 1 pipeline script (Mac / Linux / Git Bash)
-run_part2.sh       part 2 pipeline script (Mac / Linux / Git Bash)
-run_part1.ps1      part 1 pipeline script (Windows PowerShell)
-run_part2.ps1      part 2 pipeline script (Windows PowerShell)
 ```
 
 ---

@@ -6,12 +6,12 @@
 #   comparison (the figures/tables for your paper)
 #
 # Usage:
-#   ./run_part2.sh
+#   ./scripts/run_part2.sh
 #
-# Must use the SAME MODEL_DIR you trained with in run_part1.sh.
+# Must use the SAME MODEL_DIR you trained with in scripts/run_part1.sh.
 set -euo pipefail
 
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 # ---- configuration (must match run_part1.sh) ----------------------------- #
 MODEL_DIR="${MODEL_DIR:-models/bert-skills-ner}"
@@ -30,11 +30,11 @@ if ! python -c "import torch, transformers, seqeval, evaluate, pandas, matplotli
   exit 1
 fi
 if [[ ! -f "$GOLD_CONLL" ]]; then
-  echo "ERROR: $GOLD_CONLL not found. Run run_part1.sh first."
+  echo "ERROR: $GOLD_CONLL not found. Run ./scripts/run_part1.sh first."
   exit 1
 fi
 if [[ ! -d "$MODEL_DIR" ]]; then
-  echo "ERROR: trained model not found at $MODEL_DIR. Run run_part1.sh first."
+  echo "ERROR: trained model not found at $MODEL_DIR. Run ./scripts/run_part1.sh first."
   exit 1
 fi
 

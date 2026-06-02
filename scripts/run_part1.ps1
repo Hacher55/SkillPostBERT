@@ -4,16 +4,16 @@
 #   download data -> preprocess -> train BERT -> export a gold template
 #
 # After this finishes you HAND-CORRECT data\processed\gold.conll, then run
-# run_part2.ps1. The correction step can't be automated — it's what makes the
+# scripts\run_part2.ps1. The correction step can't be automated — it's what makes the
 # BERT-vs-baseline comparison meaningful rather than circular.
 #
 # Usage:
-#   .\run_part1.ps1
+#   .\scripts\run_part1.ps1
 #
 # Knobs (set env vars before running, e.g.):
-#   $env:MODEL_NAME = "distilbert-base-uncased"; .\run_part1.ps1
+#   $env:MODEL_NAME = "distilbert-base-uncased"; .\scripts\run_part1.ps1
 
-Set-Location $PSScriptRoot
+Set-Location (Split-Path $PSScriptRoot -Parent)
 
 # ---- configuration (single source of truth) ------------------------------ #
 $MODEL_NAME     = if ($env:MODEL_NAME)     { $env:MODEL_NAME }     else { "bert-base-uncased" }
@@ -97,5 +97,5 @@ Write-Host "   2. Fix the second column (the BIO tag) on each line:"
 Write-Host "        - add skills the matcher missed   (O  -> B-<CAT>)"
 Write-Host "        - remove false positives          (B-<CAT> -> O)"
 Write-Host "        - fix wrong categories/boundaries"
-Write-Host "   3. Then run:  .\run_part2.ps1"
+Write-Host "   3. Then run:  .\scripts\run_part2.ps1"
 Write-Host "=================================================================="

@@ -5,17 +5,17 @@
 #   download data -> preprocess -> train BERT -> export a gold template
 #
 # After this finishes you HAND-CORRECT data/processed/gold.conll, then run
-# run_part2.sh. The correction step can't be automated — it's what makes the
+# scripts/run_part2.sh. The correction step can't be automated — it's what makes the
 # BERT-vs-baseline comparison meaningful rather than circular.
 #
 # Usage:
-#   ./run_part1.sh
+#   ./scripts/run_part1.sh
 #
-# Knobs (override inline, e.g.  MODEL_NAME=distilbert-base-uncased ./run_part1.sh):
+# Knobs (override inline, e.g.  MODEL_NAME=distilbert-base-uncased ./scripts/run_part1.sh):
 set -euo pipefail
 
 # Run from the repo root regardless of where this is invoked from.
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 # ---- configuration (single source of truth) ------------------------------ #
 MODEL_NAME="${MODEL_NAME:-bert-base-uncased}"      # or distilbert-base-uncased
@@ -91,5 +91,5 @@ echo "   2. Fix the second column (the BIO tag) on each line:"
 echo "        - add skills the matcher missed   (O  -> B-<CAT>)"
 echo "        - remove false positives          (B-<CAT> -> O)"
 echo "        - fix wrong categories/boundaries"
-echo "   3. Then run:  ./run_part2.sh"
+echo "   3. Then run:  ./scripts/run_part2.sh"
 echo "=================================================================="
