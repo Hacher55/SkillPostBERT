@@ -11,9 +11,10 @@ models/
 *.safetensors
 checkpoints/
 
-# Results (keep dir, ignore large outputs)
+# Results (keep dir, ignore generated outputs)
 results/*.png
 results/*.csv
+results/*.json
 
 # Python
 __pycache__/
@@ -26,6 +27,6 @@ venv/
 # OS / editor
 .DS_Store
 .vscode/
-.idea/\
+.idea/
 .data
 .claude
