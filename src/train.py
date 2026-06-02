@@ -132,12 +132,15 @@ def main() -> None:
     out_dir = ROOT / cfg["output_dir"] if not Path(cfg["output_dir"]).is_absolute() \
         else Path(cfg["output_dir"])
 
-    # Cap batch size on CPU to avoid running out of RAM.
     train_bs = cfg["train_batch_size"]
     if hw["batch_size_cap"] and train_bs > hw["batch_size_cap"]:
-        print(f"  CPU detected — capping train batch size "
+        print(f"  {hw['device_name']} — capping train batch size "
               f"{train_bs} -> {hw['batch_size_cap']}")
         train_bs = hw["batch_size_cap"]
+
+    steps_per_epoch = max(1, len(ds["train"]) // train_bs)
+    total_steps = steps_per_epoch * cfg["epochs"]
+    warmup_steps = int(cfg["warmup_ratio"] * total_steps)
 
     training_args = TrainingArguments(
         output_dir=str(out_dir),
@@ -146,13 +149,14 @@ def main() -> None:
         per_device_eval_batch_size=cfg["eval_batch_size"],
         learning_rate=float(cfg["learning_rate"]),
         weight_decay=cfg["weight_decay"],
-        warmup_ratio=cfg["warmup_ratio"],
+        warmup_steps=warmup_steps,
         eval_strategy=cfg["eval_strategy"],
         save_strategy=cfg["save_strategy"],
         load_best_model_at_end=cfg["load_best_model_at_end"],
         metric_for_best_model=cfg["metric_for_best_model"],
         fp16=hw["fp16"],
         bf16=hw["bf16"],
+        dataloader_num_workers=hw["num_workers"],
         logging_steps=50,
         report_to="none",
     )
@@ -163,7 +167,7 @@ def main() -> None:
         train_dataset=ds["train"],
         eval_dataset=ds["validation"],
         data_collator=collator,
-        tokenizer=tokenizer,
+        processing_class=tokenizer,
         compute_metrics=make_compute_metrics(),
     )
 

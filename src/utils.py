@@ -44,9 +44,10 @@ def get_hardware_profile() -> dict:
         return {
             "device_type": "mps",
             "device_name": "Apple Silicon GPU (MPS)",
-            "fp16": False,   # fp16 is not supported on MPS
-            "bf16": False,   # bf16 on MPS is experimental; fp32 is safest
+            "fp16": False,        # fp16 not supported on MPS
+            "bf16": False,        # bf16 on MPS is experimental; fp32 is safest
             "batch_size_cap": None,
+            "num_workers": 0,     # multiprocessing DataLoader is unreliable on MPS
         }
 
     if torch.cuda.is_available():
@@ -58,6 +59,7 @@ def get_hardware_profile() -> dict:
             "fp16": True,
             "bf16": major >= 8,   # bf16 requires Ampere (sm_80) or newer
             "batch_size_cap": None,
+            "num_workers": 4,
         }
 
     return {
@@ -65,7 +67,8 @@ def get_hardware_profile() -> dict:
         "device_name": "CPU (no GPU detected)",
         "fp16": False,
         "bf16": False,
-        "batch_size_cap": 8,   # keep RAM pressure reasonable on CPU-only machines
+        "batch_size_cap": 8,      # keep RAM pressure reasonable on CPU-only machines
+        "num_workers": 0,
     }
 
 
