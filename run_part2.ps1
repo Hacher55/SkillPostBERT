@@ -17,7 +17,7 @@ $GOLD_CONLL = if ($env:GOLD_CONLL)  { $env:GOLD_CONLL }  else { "data/processed/
 $GOLD_JSONL = if ($env:GOLD_JSONL)  { $env:GOLD_JSONL }  else { "data/processed/gold.jsonl" }
 
 Write-Host "=================================================================="
-Write-Host " SkillPostBERT — pipeline part 2"
+Write-Host " SkillPostBERT -- pipeline part 2"
 Write-Host "   model dir:  $MODEL_DIR"
 Write-Host "   gold:       $GOLD_CONLL"
 Write-Host "=================================================================="

@@ -22,7 +22,7 @@ $PREPROCESS_MAX = if ($env:PREPROCESS_MAX) { $env:PREPROCESS_MAX } else { "2000"
 $GOLD_N         = if ($env:GOLD_N)         { $env:GOLD_N }         else { "60" }
 
 Write-Host "=================================================================="
-Write-Host " SkillPostBERT — pipeline part 1"
+Write-Host " SkillPostBERT -- pipeline part 1"
 Write-Host "   model:        $MODEL_NAME"
 Write-Host "   output dir:   $MODEL_DIR"
 Write-Host "   max/disc:     $PREPROCESS_MAX"
@@ -45,7 +45,7 @@ $kaggleJson = Join-Path $HOME ".kaggle\kaggle.json"
 if (-not (Test-Path $kaggleJson) -and -not $env:KAGGLE_USERNAME) {
     Write-Host "[preflight] WARNING: no Kaggle credentials found"
     Write-Host "  (~\.kaggle\kaggle.json missing and KAGGLE_USERNAME unset)."
-    Write-Host "  download_data.py will fail without them — see its docstring."
+    Write-Host "  download_data.py will fail without them -- see its docstring."
 }
 
 # ---- 1. download -------------------------------------------------------- #
@@ -91,7 +91,7 @@ Write-Host ""
 Write-Host "=================================================================="
 Write-Host " Part 1 complete."
 Write-Host ""
-Write-Host " NEXT — hand-correct the gold labels:"
+Write-Host " NEXT -- hand-correct the gold labels:"
 Write-Host "   1. Open  data\processed\gold.conll  in a text editor."
 Write-Host "   2. Fix the second column (the BIO tag) on each line:"
 Write-Host "        - add skills the matcher missed   (O  -> B-<CAT>)"
