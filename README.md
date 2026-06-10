@@ -73,6 +73,7 @@ Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
 |---|---|
 | `./scripts/setup_env.sh` | Automate steps 1–4: create env, install deps, detect GPU |
 | `./scripts/check_env.sh` | Verify environment is ready before running |
+| `./scripts/bio_editor.sh` | Launch the interactive BIO tag editor in the browser |
 | `./scripts/clear_env.sh` | Remove the conda environment entirely (rebuild with `setup_env`) |
 | `./scripts/clear_cache.sh` | Delete raw data (re-fetched on next run) |
 | `./scripts/clear_training.sh` | Delete model checkpoints (retrain without re-downloading) |
@@ -97,6 +98,7 @@ Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
 |---|---|
 | `.\scripts\setup_env.ps1` | Automate steps 1–4: create env, install deps, detect GPU |
 | `.\scripts\check_env.ps1` | Verify environment is ready before running |
+| `.\scripts\bio_editor.ps1` | Launch the interactive BIO tag editor in the browser |
 | `.\scripts\clear_env.ps1` | Remove the conda environment entirely (rebuild with `setup_env`) |
 | `.\scripts\clear_cache.ps1` | Delete raw data (re-fetched on next run) |
 | `.\scripts\clear_training.ps1` | Delete model checkpoints (retrain without re-downloading) |
@@ -285,14 +287,16 @@ flowchart TD
 **Mac / Linux / Git Bash**
 ```bash
 ./scripts/run_part1.sh
-# hand-correct data/processed/gold.conll in any text editor
+./scripts/bio_editor.sh   # interactive browser editor for gold.conll (recommended)
+# — or — edit data/processed/gold.conll directly in any text editor
 ./scripts/run_part2.sh
 ```
 
 **Windows (PowerShell)**
 ```powershell
 .\scripts\run_part1.ps1
-# hand-correct data\processed\gold.conll in any text editor
+.\scripts\bio_editor.ps1  # interactive browser editor for gold.conll (recommended)
+# — or — edit data\processed\gold.conll directly in any text editor
 .\scripts\run_part2.ps1
 ```
 
@@ -309,6 +313,65 @@ $env:MODEL_NAME = "distilbert-base-uncased"
 $env:MODEL_DIR  = "models/distilbert-skills-ner"
 .\scripts\run_part1.ps1
 ```
+
+---
+
+## BIO Tag Editor
+
+`bio_editor` is an interactive browser tool for reviewing and correcting the BIO tags in `gold.conll`. It replaces hand-editing the raw CoNLL file.
+
+### Launch
+
+**Mac / Linux / Git Bash**
+```bash
+./scripts/bio_editor.sh
+```
+
+**Windows (PowerShell)**
+```powershell
+.\scripts\bio_editor.ps1
+```
+
+The browser opens automatically at `http://localhost:5050`. The scripts install Flask on first run if it is not already present.
+
+> Run `bio_editor` **after** `run_part1` has generated `data/processed/gold.conll` and **before** running `run_part2`.
+
+### How to annotate
+
+1. **Navigate** records with the ← Prev / Next → buttons in the sidebar, or type an index in the Jump field.
+2. **Select** one word by clicking it, or a multi-word span by clicking and dragging.
+3. **Pick a category** from the bar that appears below the text — or use a keyboard shortcut.
+4. The word highlight updates immediately. Repeat for every span that needs correcting.
+5. Click **Save to gold.conll** in the sidebar when finished. The file is also auto-saved after each edit in memory; the Save button writes changes to disk.
+
+### Keyboard shortcuts
+
+| Key | Action |
+|:---:|---|
+| `←` / `→` | Previous / next record |
+| `T` | Apply **TECHNICAL** to selection |
+| `W` | Apply **TOOLS** to selection |
+| `S` | Apply **SOFT** to selection |
+| `C` | Apply **CERT** to selection |
+| `O` | Remove tag (set to **O**) |
+| `Esc` | Cancel current selection |
+
+### Category reference
+
+| Category | Description | Examples |
+|---|---|---|
+| **TECHNICAL** | Domain knowledge, engineering methods, theory | Finite Element Analysis, Machine Learning, Control Systems |
+| **TOOLS** | Named software, programming languages, platforms, instruments | Python, SolidWorks, Docker, MATLAB |
+| **SOFT** | Transferable and interpersonal skills | Communication, Teamwork, Problem Solving |
+| **CERT** | Certifications, licenses, formal credentials | PE License, PMP, AWS Certified |
+
+Tags in the editor are color-coded: **blue** = TECHNICAL, **green** = TOOLS, **amber** = SOFT, **purple** = CERT, gray = O (outside). Hover any legend chip or category button for its full description.
+
+### BIO encoding rules
+
+- The first token of a skill span is tagged `B-CATEGORY`; every subsequent token in the same span is `I-CATEGORY`.
+- A span must always start with `B-` — a lone `I-` tag is invalid.
+- The editor handles this automatically: dragging across multiple words sets `B-` on the first word and `I-` on the rest.
 
 ---
 
@@ -404,6 +467,7 @@ Writes CSV tables and figures to `results/`.
 |---|---|
 | `setup_env` | One-shot env setup: create conda env, install deps, detect and install CUDA PyTorch |
 | `check_env` | Report Python version, package versions, GPU, Kaggle credentials, and directory state |
+| `bio_editor` | Launch the interactive browser editor for reviewing and correcting gold.conll BIO tags |
 | `clear_env` | Remove the conda environment entirely — run `setup_env` afterwards to rebuild |
 | `clear_cache` | `data/raw/` — datasets are re-fetched on the next run |
 | `clear_training` | `models/` — checkpoints are regenerated on the next train |
@@ -416,6 +480,7 @@ Writes CSV tables and figures to `results/`.
 ```bash
 ./scripts/setup_env.sh        # run from base env, before activating
 ./scripts/check_env.sh        # run after activating
+./scripts/bio_editor.sh       # run after run_part1, before run_part2
 ./scripts/clear_env.sh        # run after deactivating (conda deactivate)
 ./scripts/clear_cache.sh
 ./scripts/clear_training.sh
@@ -426,6 +491,7 @@ Writes CSV tables and figures to `results/`.
 ```powershell
 .\scripts\setup_env.ps1       # run from base env, before activating
 .\scripts\check_env.ps1       # run after activating
+.\scripts\bio_editor.ps1      # run after run_part1, before run_part2
 .\scripts\clear_env.ps1       # run after deactivating (conda deactivate)
 .\scripts\clear_cache.ps1
 .\scripts\clear_training.ps1
@@ -447,11 +513,14 @@ src/
   evaluate.py       BERT vs baseline on a hand-corrected gold set
   compare.py        cross-discipline skill analysis + charts
   utils.py          shared helpers + hardware detection
+tools/
+  bio_editor.py     interactive browser tool for reviewing and editing gold.conll BIO tags
 configs/
   bert_base.yaml    default training hyperparameters
 scripts/
   setup_env.sh/.ps1       one-shot env setup: conda env, deps, CUDA PyTorch
   check_env.sh/.ps1       diagnostic: Python, packages, GPU, Kaggle, directories
+  bio_editor.sh/.ps1      launch the interactive BIO tag editor
   clear_env.sh/.ps1       remove the conda environment entirely
   run_part1.sh/.ps1       pipeline part 1: download → preprocess → train → export gold
   run_part2.sh/.ps1       pipeline part 2: apply corrections → evaluate → compare
