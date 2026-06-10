@@ -17,6 +17,37 @@ NLP Applications course project (ECE/SSE/CYS 691).
 
 ---
 
+## BIO skill tags
+
+The model uses **BIO (Beginning-Inside-Outside) tagging** across four skill categories, producing nine labels total.
+
+### Tag scheme
+
+| Tag | Meaning |
+|---|---|
+| `O` | Token is **not** part of any skill mention |
+| `B-TECHNICAL` | **Start** of a technical skill (domain knowledge, methods, theory) |
+| `I-TECHNICAL` | **Continuation** of a technical skill span |
+| `B-TOOLS` | **Start** of a tools skill (named software, language, platform, or instrument) |
+| `I-TOOLS` | **Continuation** of a tools skill span |
+| `B-SOFT` | **Start** of a soft skill (transferable / interpersonal skill) |
+| `I-SOFT` | **Continuation** of a soft skill span |
+| `B-CERT` | **Start** of a certification (license, formal credential) |
+| `I-CERT` | **Continuation** of a certification span |
+
+### Category descriptions
+
+| Category | Description | Examples |
+|---|---|---|
+| `TECHNICAL` | Domain knowledge, engineering methods, and theory | Finite Element Analysis, Machine Learning, Control Systems |
+| `TOOLS` | Named software, programming languages, platforms, or instruments | Python, SolidWorks, Docker, MATLAB |
+| `SOFT` | Transferable and interpersonal skills | Communication, Teamwork, Problem Solving |
+| `CERT` | Certifications, licenses, and formal credentials | PE License, PMP, AWS Certified |
+
+`B-` marks the first token of a multi-word skill; `I-` marks every subsequent token in the same span. Single-token skills use only `B-`. When editing `gold.conll`, every skill span must start with `B-` — starting with `I-` is invalid.
+
+---
+
 ## Quick reference
 
 Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
