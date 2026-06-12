@@ -14,6 +14,7 @@ NLP Applications course project (ECE/SSE/CYS 691).
 2. **Classifies** each skill into a taxonomy: Technical, Tools, Soft Skills, Certifications.
 3. **Compares** skill demand across the three engineering disciplines and visualizes the differences.
 4. **Baseline:** a rule-based keyword matcher, included to demonstrate the value added by the learned model. Both are scored on Precision / Recall / F1 per category.
+5. **BIO Tag Editor:** an interactive browser tool (`bio_editor`) for reviewing and correcting the gold-set BIO tags, used in place of hand-editing `gold.conll`.
 
 ---
 
@@ -64,7 +65,7 @@ Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
 | 4 *(GPU)* | `pip install torch … --index-url …/cu128` | Swap in CUDA PyTorch — [see GPU setup](#3--gpu--cuda-setup-nvidia-only) |
 | 5 | copy `~/.kaggle/kaggle.json` | Place Kaggle credentials — [see Kaggle setup](#4--place-your-kaggle-credentials) |
 | 6 | `./scripts/run_part1.sh` | Download → preprocess → train BERT → export gold set |
-| 7 | edit `data/processed/gold.conll` | **Manual:** hand-correct BIO tags in the gold file |
+| 7 | `./scripts/bio_editor.sh` | **Manual:** review/correct BIO tags via the [browser editor](#bio-tag-editor) (or edit `data/processed/gold.conll` directly) |
 | 8 | `./scripts/run_part2.sh` | Apply corrections → evaluate → generate charts |
 
 **Utilities**
@@ -89,7 +90,7 @@ Steps 1–5 are one-time setup. Steps 6–8 are the pipeline.
 | 4 *(GPU)* | `pip install torch … --index-url …/cu128` | Swap in CUDA PyTorch — [see GPU setup](#3--gpu--cuda-setup-nvidia-only) |
 | 5 | copy `~\.kaggle\kaggle.json` | Place Kaggle credentials — [see Kaggle setup](#4--place-your-kaggle-credentials) |
 | 6 | `.\scripts\run_part1.ps1` | Download → preprocess → train BERT → export gold set |
-| 7 | edit `data\processed\gold.conll` | **Manual:** hand-correct BIO tags in the gold file |
+| 7 | `.\scripts\bio_editor.ps1` | **Manual:** review/correct BIO tags via the [browser editor](#bio-tag-editor) (or edit `data\processed\gold.conll` directly) |
 | 8 | `.\scripts\run_part2.ps1` | Apply corrections → evaluate → generate charts |
 
 **Utilities**
