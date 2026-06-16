@@ -55,7 +55,7 @@ def decode_spans(tokens: list[str], tags: list[str]) -> list[tuple[str, str]]:
         cur_tokens, cur_cat = [], None
 
     for tok, tag in zip(tokens, tags):
-        if tag == "O" or tag in ("[CLS]", "[SEP]", "[PAD]"):
+        if tag == "O" or tok in ("[CLS]", "[SEP]", "[PAD]"):
             flush()
             continue
         prefix, _, cat = tag.partition("-")
@@ -71,9 +71,14 @@ def decode_spans(tokens: list[str], tags: list[str]) -> list[tuple[str, str]]:
     return spans
 
 
+_SPECIAL = frozenset({"[CLS]", "[SEP]", "[PAD]"})
+
+
 def _detok(tokens: list[str]) -> str:
     out: list[str] = []
     for t in tokens:
+        if t in _SPECIAL:
+            continue
         if t.startswith("##") and out:
             out[-1] = out[-1] + t[2:]
         else:
