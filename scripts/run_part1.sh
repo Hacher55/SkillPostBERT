@@ -55,31 +55,46 @@ python -m src.download_data
 
 # ---- 2. preprocess ------------------------------------------------------ #
 echo ""
-echo "[2/4] preprocessing (weak-labeling BIO tags) ..."
-python -m src.preprocess --model "$MODEL_NAME" --max "$PREPROCESS_MAX"
+if [[ -f "data/processed/corpus.jsonl" ]]; then
+  echo "[2/4] corpus already exists at data/processed/corpus.jsonl — skipping preprocessing."
+  echo "       Delete it to force re-preprocessing."
+else
+  echo "[2/4] preprocessing (weak-labeling BIO tags) ..."
+  python -m src.preprocess --model "$MODEL_NAME" --max "$PREPROCESS_MAX"
+fi
 
 # ---- 3. train ----------------------------------------------------------- #
 echo ""
-echo "[3/4] training ..."
-read GPU_TYPE GPU_LABEL < <(python -c "
+if [[ -f "$MODEL_DIR/config.json" ]]; then
+  echo "[3/4] trained model found at $MODEL_DIR — skipping training."
+  echo "       Delete that directory to force re-training."
+else
+  echo "[3/4] training ..."
+  read GPU_TYPE GPU_LABEL < <(python -c "
 from src.utils import get_hardware_profile
 p = get_hardware_profile()
 print(p['device_type'], p['device_name'])
 " 2>/dev/null || echo "cpu CPU (no GPU detected)")
 
-echo "  $GPU_LABEL"
-if [[ "$GPU_TYPE" == "cpu" ]]; then
-  echo "  WARNING: no GPU detected. Fine-tuning $MODEL_NAME on CPU is slow"
-  echo "  (potentially hours). Consider MODEL_NAME=distilbert-base-uncased."
-  echo "  Press Ctrl-C within 8 seconds to abort ..."
-  sleep 8
+  echo "  $GPU_LABEL"
+  if [[ "$GPU_TYPE" == "cpu" ]]; then
+    echo "  WARNING: no GPU detected. Fine-tuning $MODEL_NAME on CPU is slow"
+    echo "  (potentially hours). Consider MODEL_NAME=distilbert-base-uncased."
+    echo "  Press Ctrl-C within 8 seconds to abort ..."
+    sleep 8
+  fi
+  python -m src.train --model "$MODEL_NAME" --output-dir "$MODEL_DIR"
 fi
-python -m src.train --model "$MODEL_NAME" --output-dir "$MODEL_DIR"
 
 # ---- 4. export gold template -------------------------------------------- #
 echo ""
-echo "[4/4] exporting gold annotation template ..."
-python -m src.evaluate --export-gold --n "$GOLD_N" --model-name "$MODEL_NAME"
+if [[ -f "data/processed/gold.conll" ]]; then
+  echo "[4/4] gold.conll already exists — skipping export to preserve annotations."
+  echo "       Delete data/processed/gold.conll to regenerate."
+else
+  echo "[4/4] exporting gold annotation template ..."
+  python -m src.evaluate --export-gold --n "$GOLD_N" --model-name "$MODEL_NAME"
+fi
 
 echo ""
 echo "=================================================================="

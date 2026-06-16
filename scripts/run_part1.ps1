@@ -56,36 +56,53 @@ if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # ---- 2. preprocess ------------------------------------------------------ #
 Write-Host ""
-Write-Host "[2/4] preprocessing (weak-labeling BIO tags) ..."
-python -m src.preprocess --model $MODEL_NAME --max $PREPROCESS_MAX
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$corpusPath = "data\processed\corpus.jsonl"
+if (Test-Path $corpusPath) {
+    Write-Host "[2/4] corpus already exists at $corpusPath — skipping preprocessing."
+    Write-Host "       Delete it to force re-preprocessing."
+} else {
+    Write-Host "[2/4] preprocessing (weak-labeling BIO tags) ..."
+    python -m src.preprocess --model $MODEL_NAME --max $PREPROCESS_MAX
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
 
 # ---- 3. train ----------------------------------------------------------- #
 Write-Host ""
-Write-Host "[3/4] training ..."
-$gpuOutput = python -c "from src.utils import get_hardware_profile; p = get_hardware_profile(); print(p['device_type'], p['device_name'])" 2>$null
-if ($LASTEXITCODE -ne 0 -or -not $gpuOutput) {
-    $gpuOutput = "cpu CPU (no GPU detected)"
-}
-$gpuParts  = $gpuOutput.Trim() -split '\s+', 2
-$GPU_TYPE  = $gpuParts[0]
-$GPU_LABEL = if ($gpuParts.Count -gt 1) { $gpuParts[1] } else { $gpuParts[0] }
+if (Test-Path "$MODEL_DIR\config.json") {
+    Write-Host "[3/4] trained model found at $MODEL_DIR — skipping training."
+    Write-Host "       Delete that directory to force re-training."
+} else {
+    Write-Host "[3/4] training ..."
+    $gpuOutput = python -c "from src.utils import get_hardware_profile; p = get_hardware_profile(); print(p['device_type'], p['device_name'])" 2>$null
+    if ($LASTEXITCODE -ne 0 -or -not $gpuOutput) {
+        $gpuOutput = "cpu CPU (no GPU detected)"
+    }
+    $gpuParts  = $gpuOutput.Trim() -split '\s+', 2
+    $GPU_TYPE  = $gpuParts[0]
+    $GPU_LABEL = if ($gpuParts.Count -gt 1) { $gpuParts[1] } else { $gpuParts[0] }
 
-Write-Host "  $GPU_LABEL"
-if ($GPU_TYPE -eq "cpu") {
-    Write-Host "  WARNING: no GPU detected. Fine-tuning $MODEL_NAME on CPU is slow"
-    Write-Host "  (potentially hours). Consider `$env:MODEL_NAME = 'distilbert-base-uncased'."
-    Write-Host "  Press Ctrl-C within 8 seconds to abort ..."
-    Start-Sleep -Seconds 8
+    Write-Host "  $GPU_LABEL"
+    if ($GPU_TYPE -eq "cpu") {
+        Write-Host "  WARNING: no GPU detected. Fine-tuning $MODEL_NAME on CPU is slow"
+        Write-Host "  (potentially hours). Consider `$env:MODEL_NAME = 'distilbert-base-uncased'."
+        Write-Host "  Press Ctrl-C within 8 seconds to abort ..."
+        Start-Sleep -Seconds 8
+    }
+    python -m src.train --model $MODEL_NAME --output-dir $MODEL_DIR
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 }
-python -m src.train --model $MODEL_NAME --output-dir $MODEL_DIR
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
 
 # ---- 4. export gold template -------------------------------------------- #
 Write-Host ""
-Write-Host "[4/4] exporting gold annotation template ..."
-python -m src.evaluate --export-gold --n $GOLD_N --model-name $MODEL_NAME
-if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+$goldConll = "data\processed\gold.conll"
+if (Test-Path $goldConll) {
+    Write-Host "[4/4] gold.conll already exists — skipping export to preserve annotations."
+    Write-Host "       Delete $goldConll to regenerate."
+} else {
+    Write-Host "[4/4] exporting gold annotation template ..."
+    python -m src.evaluate --export-gold --n $GOLD_N --model-name $MODEL_NAME
+    if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+}
 
 Write-Host ""
 Write-Host "=================================================================="

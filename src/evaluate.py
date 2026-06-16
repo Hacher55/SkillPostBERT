@@ -17,10 +17,12 @@ Three-step workflow
        python src/evaluate.py --export-gold --n 60
 
    Writes gold.jsonl (full metadata) + gold.conll (token<TAB>tag, easy to edit).
+   Special tokens ([CLS], [SEP], [PAD]) are omitted from gold.conll since they
+   are not annotatable; they are retained in gold.jsonl for model input.
 
 2. Open gold.conll in any text editor and FIX the tags — add skills the matcher
-   missed, remove false hits, fix category/boundaries. Leave [CLS]/[SEP] rows
-   as-is. This is correction, not from-scratch labeling, so it's fast.
+   missed, remove false hits, fix category/boundaries. This is correction, not
+   from-scratch labeling, so it's fast.
 
 3. Fold corrections back in and evaluate:
 
@@ -45,6 +47,8 @@ from .utils import ROOT, read_jsonl as _read_jsonl
 PROC_DIR = ROOT / "data" / "processed"
 RESULTS_DIR = ROOT / "results"
 DEFAULT_GOLD = PROC_DIR / "gold.jsonl"
+
+_SPECIAL = frozenset({"[CLS]", "[SEP]", "[PAD]"})
 
 
 # --------------------------------------------------------------------------- #
@@ -91,7 +95,8 @@ def export_gold(n: int, model_name: str, seed: int) -> None:
         for r in gold_records:
             f.write(f"# id: {r['id']}  ({r['discipline']})\n")
             for token, tag in zip(r["tokens"], r["tags"]):
-                f.write(f"{token}\t{tag}\n")
+                if token not in _SPECIAL:
+                    f.write(f"{token}\t{tag}\n")
             f.write("\n")
 
     print(f"Wrote {len(gold_records)} records:")
@@ -135,14 +140,21 @@ def apply_conll(conll_path: Path) -> None:
         new_tags = corrected.get(rec["id"])
         if new_tags is None:
             continue
-        if len(new_tags) != len(rec["tokens"]):
-            bad.append((rec["id"], len(new_tags), len(rec["tokens"])))
+        # gold.conll omits special tokens; find the non-special positions in
+        # gold.jsonl's full token list to align corrections correctly.
+        non_special_indices = [i for i, t in enumerate(rec["tokens"])
+                               if t not in _SPECIAL]
+        if len(new_tags) != len(non_special_indices):
+            bad.append((rec["id"], len(new_tags), len(non_special_indices)))
             continue
         invalid = [t for t in new_tags if t not in LABEL2ID]
         if invalid:
             bad.append((rec["id"], f"invalid tags: {set(invalid)}", ""))
             continue
-        rec["tags"] = new_tags
+        merged = list(rec["tags"])
+        for idx, tag in zip(non_special_indices, new_tags):
+            merged[idx] = tag
+        rec["tags"] = merged
         updated += 1
 
     if bad:
