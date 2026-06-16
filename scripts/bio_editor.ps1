@@ -4,7 +4,7 @@ Set-Location $root
 
 try { python -c "import flask" 2>$null } catch {}
 if ($LASTEXITCODE -ne 0) {
-    Write-Host "flask not found — installing..."
+    Write-Host "flask not found - installing..."
     pip install flask
 }
 
