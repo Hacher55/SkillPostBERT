@@ -273,20 +273,21 @@ def plot_heatmap(agg: dict, k: int = 15) -> None:
             if name not in skills:
                 skills.append(name)
 
-    mat = np.zeros((len(skills), len(DISCIPLINES)))
-    for j, d in enumerate(DISCIPLINES):
+    # mat shape: (disciplines × skills) — horizontal layout, skills on X axis
+    mat = np.zeros((len(DISCIPLINES), len(skills)))
+    for i, d in enumerate(DISCIPLINES):
         total = max(agg["postings"][d], 1)
-        for i, s in enumerate(skills):
+        for j, s in enumerate(skills):
             mat[i, j] = 100 * agg["skill_counts"][d][s] / total
 
-    fig, ax = plt.subplots(figsize=(7, max(6, len(skills) * 0.32)))
+    fig, ax = plt.subplots(figsize=(max(10, len(skills) * 0.55), 3.5))
     im = ax.imshow(mat, aspect="auto", cmap="YlGnBu")
-    ax.set_xticks(range(len(DISCIPLINES)))
-    ax.set_xticklabels([DISCIPLINE_NAMES[d] for d in DISCIPLINES])
-    ax.set_yticks(range(len(skills)))
-    ax.set_yticklabels(skills, fontsize=8)
-    ax.set_title(f"Skill demand across disciplines (% of postings)")
-    fig.colorbar(im, ax=ax, label="% of postings")
+    ax.set_yticks(range(len(DISCIPLINES)))
+    ax.set_yticklabels([DISCIPLINE_NAMES[d] for d in DISCIPLINES], fontsize=10)
+    ax.set_xticks(range(len(skills)))
+    ax.set_xticklabels(skills, fontsize=8, rotation=45, ha="right")
+    ax.set_title("Skill demand across disciplines (% of postings)", pad=10)
+    fig.colorbar(im, ax=ax, label="% of postings", shrink=0.8)
     fig.tight_layout()
     out = RESULTS_DIR / "skill_heatmap.png"
     fig.savefig(out, dpi=150, bbox_inches="tight")

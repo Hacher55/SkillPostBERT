@@ -30,3 +30,6 @@ venv/
 .idea/
 .data
 .claude
+
+# Local secrets (API tokens, etc.)
+.env
